@@ -40,18 +40,24 @@ namespace API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto) {
-            var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
-            if (user == null) return Unauthorized("invalid username");
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        {
+            var user = await _context.Users
+                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
+
+            if (user == null) return Unauthorized("Invalid username");
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
-            var ComputedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
 
-            for (int i = 0; i < ComputedHash.Length; i++) {
-                if(ComputedHash[i] != user.PasswordHash[i]) return Unauthorized("invalid password");
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+
+            for (int i = 0; i < computedHash.Length; i++)
+            {
+                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
 
-            return new UserDto{
+            return new UserDto
+            {
                 Username = user.UserName,
                 Token = _tokenService.CreateToken(user)
             };

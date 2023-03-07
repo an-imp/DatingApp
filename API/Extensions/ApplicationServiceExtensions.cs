@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Services;
 using Microsoft.EntityFrameworkCore;
+using API.Interfaces;
 
 namespace API.Extensions
 {
@@ -13,15 +14,15 @@ namespace API.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddDbContext<DataContext>(opt =>
+            // services.AddScoped<ITokenService, TokenService>();
+            services.AddDbContext<DataContext>(options =>
             {
-                opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                options.UseSqlite(config.GetConnectionString("DefaultConnection"));
             });
             services.AddCors();
-            services.AddScoped<TokenService, TokenService>();
+            services.AddScoped<ITokenService, TokenService>();
+
             return services;
         }
-
-
     }
 }
